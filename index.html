@@ -1,1028 +1,422 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simplex Solver - Solucionador de Programación Lineal</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Portafolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
     <style>
-        :root {
-            --primary: #4a00e0;
-            --secondary: #8e2de2;
-            --accent: #00ff41;
-            --text-light: #333;
-            --text-dark: #f1f1f1;
-            --bg-light: #f9f9f9;
-            --bg-dark: #121212;
-            --card-light: white;
-            --card-dark: #1e1e1e;
-            --border-light: #ddd;
-            --border-dark: #333;
-            --success: #00c853;
-            --error: #ff5252;
-            --warning: #ffab00;
+        :root{
+            --bg:#fff;--ink:#0f1216;--mut:#5d6672;--rule:#e4e7eb;--ac:#2540d9;--on:#fff;
+            --card:#fafbfc;--shadow:0 1px 2px rgb(15 18 22/.05);
+            color-scheme:light dark;
         }
-
-        .light-mode {
-            --bg-primary: var(--bg-light);
-            --text-primary: var(--text-light);
-            --card-bg: var(--card-light);
-            --border-color: var(--border-light);
-            --header-bg: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            --button-bg: linear-gradient(to right, var(--primary), var(--secondary));
-            --table-header: #f3f0ff;
-            --table-row: #f9f9f9;
-            --solution-bg: #e6f7ff;
-            --example-bg: #fff4e6;
+        html[data-theme="dark"]{
+            --bg:#0d0f12;--ink:#eceef1;--mut:#9099a5;--rule:#23272d;--ac:#8fa2ff;
+            --card:#12151a;--shadow:0 1px 2px rgb(0 0 0/.4);
         }
-
-        .dark-mode {
-            --bg-primary: var(--bg-dark);
-            --text-primary: var(--text-dark);
-            --card-bg: var(--card-dark);
-            --border-color: var(--border-dark);
-            --header-bg: linear-gradient(135deg, #000000 0%, #003300 100%);
-            --button-bg: linear-gradient(to right, #00ff41, #00b32d);
-            --table-header: #1a331a;
-            --table-row: #262626;
-            --solution-bg: #002200;
-            --example-bg: #332100;
-            --accent-glow: 0 0 5px var(--accent), 0 0 10px var(--accent);
+        *{box-sizing:border-box}
+        html,body{background:var(--bg);color:var(--ink)}
+        body{margin:0;font:16px/1.65 "Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;transition:background .2s ease,color .2s ease}
+        body.adm{padding-bottom:96px}
+        a{color:var(--ac);text-underline-offset:3px}
+        :focus-visible{outline:2px solid var(--ac);outline-offset:3px;border-radius:4px}
+        img{max-width:100%;display:block}
+        .w{max-width:880px;margin:0 auto;padding:0 24px}
+        .mut{color:var(--mut)}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0;position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg) 92%,transparent);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid transparent}
+        .top.scrolled{border-bottom-color:var(--rule)}
+        .brand{font-weight:700;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+        .tools{display:flex;align-items:center;gap:8px}
+        nav{display:flex;gap:20px}
+        nav a{color:var(--mut);text-decoration:none}
+        nav a:hover{color:var(--ink)}
+        .iconbtn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer;padding:0;font:inherit}
+        .iconbtn:hover{border-color:var(--ac)}
+        .iconbtn svg{width:18px;height:18px}
+        .hamb{display:none}
+        h1{font-size:clamp(2.1rem,6.4vw,3.6rem);line-height:1.07;letter-spacing:-.035em;font-weight:600;margin:12vh 0 24px;max-width:19ch}
+        .lede{font-size:1.1rem;color:var(--mut);max-width:56ch;margin:0}
+        section{margin-top:88px}
+        h2{font-size:.95rem;font-weight:600;color:var(--mut);margin:0 0 10px;letter-spacing:.02em}
+        /* Proyectos */
+        .grid{display:grid;gap:22px}
+        @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+        .card{border:1px solid var(--rule);border-radius:14px;overflow:hidden;background:var(--card);display:flex;flex-direction:column;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+        .card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:color-mix(in oklab,var(--ac) 35%,var(--rule))}
+        .thumb{aspect-ratio:16/10;background:linear-gradient(135deg,color-mix(in oklab,var(--ac) 18%,var(--bg)),color-mix(in oklab,var(--ac) 6%,var(--bg)));position:relative;overflow:hidden}
+        .thumb img{width:100%;height:100%;object-fit:cover}
+        .thumb .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);font-size:.85rem}
+        .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+        .card h3{margin:0;font-size:1.08rem;font-weight:600;letter-spacing:-.01em}
+        .card p{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+        .tg{font-size:.82rem;color:var(--mut);opacity:.9}
+        .tg span{display:inline-block;margin-right:6px}
+        .links{display:flex;flex-wrap:wrap;gap:14px;margin-top:auto;padding-top:10px;font-size:.9rem}
+        .links a{text-decoration:none;font-weight:500}
+        .links a:hover{text-decoration:underline}
+        .ctl{display:none;gap:14px}
+        body.adm .ctl{display:inline-flex}
+        .t{background:none;border:0;padding:0;font:inherit;color:var(--mut);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+        .t:hover{color:var(--ink)}
+        .sk{margin:0;max-width:60ch}
+        .ct{display:flex;flex-wrap:wrap;gap:6px 20px}
+        footer{padding:80px 0 48px;color:var(--mut);font-size:.9rem;border-top:1px solid var(--rule);margin-top:80px}
+        #seal{cursor:default;user-select:none;padding:6px 2px}
+        .msg{margin:20vh 0;color:var(--mut)}
+        /* Admin bar */
+        #bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:none;flex-wrap:wrap;justify-content:center;gap:4px;padding:6px;width:max-content;max-width:calc(100vw - 24px);background:var(--ink);border-radius:12px;box-shadow:0 10px 30px rgb(0 0 0/.25);z-index:30}
+        body.adm #bar{display:flex}
+        #bar button{font:inherit;font-size:.9rem;cursor:pointer;background:transparent;color:var(--bg);border:0;padding:8px 12px;border-radius:8px}
+        #bar button:hover{background:rgb(128 128 128/.3)}
+        #bar span{align-self:center;padding:0 10px;font-size:.85rem;color:var(--bg);opacity:.7}
+        /* Dialog */
+        dialog{background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:14px;width:min(560px,calc(100vw - 28px));max-height:calc(100dvh - 40px);overflow:auto;padding:24px;font:inherit;box-shadow:0 20px 60px rgb(0 0 0/.3)}
+        dialog::backdrop{background:rgb(0 0 0/.5);backdrop-filter:blur(2px)}
+        dialog h2{font-size:1.15rem;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em}
+        label{display:block;margin-top:14px;font-size:.85rem;color:var(--mut)}
+        input,textarea,select{display:block;width:100%;margin-top:5px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:9px 11px}
+        textarea{resize:vertical;min-height:70px}
+        input[type=file]{padding:7px;cursor:pointer}
+        .row{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap}
+        .b{font:inherit;cursor:pointer;border:1px solid var(--rule);background:transparent;color:var(--ink);padding:8px 14px;border-radius:8px}
+        .b:hover{border-color:var(--ac)}
+        .b.p2{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+        .b.p2:hover{background:var(--ac);border-color:var(--ac);color:var(--on)}
+        .b:disabled{opacity:.5;cursor:not-allowed}
+        .er{color:#c0392b;min-height:1.3em;margin:10px 0 0;font-size:.9rem}
+        html[data-theme="dark"] .er{color:#ff8a80}
+        .preview{margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid var(--rule);aspect-ratio:16/10;background:var(--card);display:none}
+        .preview.on{display:block}
+        .preview img{width:100%;height:100%;object-fit:cover}
+        /* Móvil */
+        @media(max-width:640px){
+            .w{padding:0 18px}
+            nav{display:none}
+            nav.open{display:flex;position:absolute;right:18px;top:64px;background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:10px 14px;flex-direction:column;gap:10px;box-shadow:var(--shadow);min-width:160px}
+            .hamb{display:inline-flex}
+            h1{margin-top:8vh}
+            section{margin-top:64px}
+            footer{margin-top:56px}
+            dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:0}
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow-x: auto;
-            margin: 20px 0;
-            border: 1px solid var(--border-color);
-        }
-        
-        header {
-            background: var(--header-bg);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-        
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .content {
-            padding: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 900px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .input-section, .output-section {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            min-width: 0;
-            border: 1px solid var(--border-color);
-        }
-        
-        h2 {
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-        }
-        
-        .dark-mode h2 {
-            color: var(--accent);
-            text-shadow: var(--accent-glow);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            resize: vertical;
-            transition: border-color 0.3s;
-            background: var(--card-bg);
-            color: var(--text-primary);
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .dark-mode textarea:focus {
-            border-color: var(--accent);
-            box-shadow: var(--accent-glow);
-        }
-        
-        .example {
-            background: var(--example-bg);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-            border-left: 4px solid var(--warning);
-        }
-        
-        .problem-type {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .problem-type label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-        }
-        
-        button {
-            background: var(--button-bg);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: block;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.4);
-        }
-        
-        .dark-mode button:hover {
-            box-shadow: 0 6px 15px rgba(0, 255, 65, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .output {
-            margin-top: 20px;
-        }
-        
-        .result-box {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-        }
-        
-        .result-title {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-        
-        .dark-mode .result-title {
-            color: var(--accent);
-            text-shadow: var(--accent-glow);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 14px;
-            min-width: 600px;
-        }
-        
-        th, td {
-            padding: 8px 10px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-        
-        th {
-            background-color: var(--table-header);
-            font-weight: 600;
-        }
-        
-        tr:nth-child(even) {
-            background-color: var(--table-row);
-        }
-        
-        .iteration {
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            background: var(--card-bg);
-            overflow-x: auto;
-        }
-        
-        .iteration-title {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 12px;
-            text-align: center;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 16px;
-        }
-        
-        .dark-mode .iteration-title {
-            color: var(--accent);
-            text-shadow: var(--accent-glow);
-        }
-        
-        .solution {
-            background: var(--solution-bg);
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid var(--success);
-        }
-        
-        .solution-title {
-            font-weight: 600;
-            color: var(--success);
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .variable {
-            margin: 8px 0;
-            padding: 10px;
-            background: var(--card-bg);
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        .dark-mode .spinner {
-            border-top: 4px solid var(--accent);
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error {
-            background: #ffe6e6;
-            color: var(--error);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid var(--error);
-        }
-        
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            align-items: center;
-        }
-        
-        .control-btn {
-            padding: 8px 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .dark-mode .control-btn {
-            background: var(--accent);
-            color: black;
-            font-weight: bold;
-        }
-        
-        .control-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        .performance-info {
-            background: var(--solution-bg);
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        /* Estilos para bloquear inspección */
-        .no-select {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-        
-        .no-inspect {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 9999;
-            display: none;
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .dark-mode .logo {
-            text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
-        }
+        @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
     </style>
 </head>
-<body class="no-select no-inspect dark-mode" oncontextmenu="return false;">
-    <div class="overlay" id="overlay"></div>
-    
-    <div class="container">
-        <header>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
-            <div class="logo">🧮</div>
-            <h1>Método Simplex - Solucionador</h1>
-            <p class="subtitle">Resuelve problemas de programación lineal con el algoritmo simplex</p>
-        </header>
-        
-        <div class="content">
-            <div class="input-section">
-                <h2>Ingresar Problema</h2>
-                <div class="problem-type">
-                    <label>
-                        <input type="radio" name="problemType" value="max" checked> Maximización
-                    </label>
-                    <label>
-                        <input type="radio" name="problemType" value="min"> Minimización
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="problemInput">Formato: función_objetivo; restricción1; restricción2; ...</label>
-                    <textarea id="problemInput" placeholder="Ejemplo: 5x1 + 4x2; 6x1 + 4x2 <= 24; x1 + x2 <= 5; x1 >= 0; x2 >= 0"></textarea>
-                    <div class="example">
-                        <strong>Ejemplos válidos:</strong><br>
-                        • 3x1 + 2x2; 2x1 + x2 <= 18; x1 - x2 >= 2<br>
-                        • 5x1 + 4x2; 6x1 + 4x2 <= 24; 6x1 + 3x2 <= 22.5; x1 + x2 <= 5<br>
-                        • 4x1 + 3x2; x1 + x2 <= 10; 2x1 + x2 <= 16; x1 >= 0; x2 >= 0
-                    </div>
-                </div>
-                <button id="solveBtn">Resolver con Método Simplex</button>
-                
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Procesando, por favor espere...</p>
-                </div>
-            </div>
-            
-            <div class="output-section">
-                <h2>Resultados y Solución</h2>
-                <div id="errorContainer"></div>
-                <div class="controls" id="controls" style="display: none;">
-                    <button class="control-btn" id="prevIteration" disabled>Anterior</button>
-                    <button class="control-btn" id="nextIteration" disabled>Siguiente</button>
-                    <span id="iterationCounter">Iteración 0/0</span>
-                </div>
-                <div id="output"></div>
-            </div>
+<body>
+<!-- 1) Configura tus credenciales de Supabase (Project Settings → API) -->
+<script>
+    const SUPABASE_URL='https://cketqsyfpivjhaldvmgq.supabase.co';
+    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZXRxc3lmcGl2amhhbGR2bWdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NDI1ODksImV4cCI6MjEwODExODU4OX0.rqAClWojN8qIHiGe__KBzGT6dGL-N9m_6EsUzluYMMI';
+    const BUCKET='projects'; // mismo nombre que en supabase.sql
+</script>
+<div id="app"></div>
+<div id="bar"></div>
+<dialog id="dlg"></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+    (()=>{
+        /* ---------- Utilidades ---------- */
+        const $=(s,r=document)=>r.querySelector(s);
+        const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+        const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const safe=u=>/^https?:\/\//i.test(u||'')?u:'';
+        const link=(u,t)=>safe(u)?`<a href="${esc(safe(u))}" target="_blank" rel="noopener">${t}</a>`:'';
+        const list=s=>s.split(',').map(x=>x.trim()).filter(Boolean);
+        const fld=(id,l,v,t,extra='')=>`<label for="${id}">${l}${t==='ta'?`<textarea id="${id}" rows="3">${esc(v)}</textarea>`:`<input id="${id}" type="${t||'text'}" value="${esc(v)}" ${extra}>`}</label>`;
+
+        const app=$('#app'),bar=$('#bar'),dlg=$('#dlg');
+        let P={},L=[],adm=false,K={};
+        const sb=window.supabase&&!/TU-PROYECTO|TU_ANON/.test(SUPABASE_URL+SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
+            : null;
+
+        /* ---------- Tema (claro/oscuro/auto) ---------- */
+        const THEME_KEY='portfolio-theme';
+        function applyTheme(t){
+            const root=document.documentElement;
+            if(t==='auto') root.removeAttribute('data-theme');
+            else root.setAttribute('data-theme',t);
+            localStorage.setItem(THEME_KEY,t);
+            const btn=$('#themeBtn');
+            if(btn){
+                btn.setAttribute('aria-label',`Tema: ${t==='auto'?'automático':t==='dark'?'oscuro':'claro'}`);
+                btn.title=`Tema: ${t==='auto'?'automático':t==='dark'?'oscuro':'claro'} (clic para cambiar)`;
+                btn.innerHTML=themeIcon(t);
+            }
+        }
+        function themeIcon(t){
+            if(t==='dark') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+            if(t==='light') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>';
+        }
+        function cycleTheme(){
+            const cur=localStorage.getItem(THEME_KEY)||'auto';
+            const next=cur==='auto'?'light':cur==='light'?'dark':'auto';
+            applyTheme(next);
+        }
+        applyTheme(localStorage.getItem(THEME_KEY)||'auto');
+
+        /* ---------- Diálogos ---------- */
+        function show(h,k){K=k||{};dlg.innerHTML=h;if(!dlg.open)dlg.showModal();}
+        const info=(t,m)=>show(`<h2>${esc(t)}</h2><p class="mut">${esc(m)}</p><div class="row"><button class="b" data-do="close">Cerrar</button></div>`);
+        const ask=(m,ok)=>new Promise(r=>show(`<p>${esc(m)}</p><div class="row"><button class="b" data-do="close">Cancelar</button><button class="b p2" data-do="yes">${esc(ok)}</button></div>`,{yes(){dlg.close();r(true)},close(){dlg.close();r(false)}}));
+
+        /* ---------- Storage ---------- */
+        async function uploadImage(file){
+            if(!file) return null;
+            if(!file.type.startsWith('image/')) throw new Error('El archivo debe ser una imagen.');
+            if(file.size>3*1024*1024) throw new Error('La imagen supera 3 MB.');
+            const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
+            const path=`${crypto.randomUUID()}.${ext}`;
+            const{error}=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'31536000',upsert:false,contentType:file.type});
+            if(error) throw new Error('No se pudo subir la imagen: '+error.message);
+            const{data}=sb.storage.from(BUCKET).getPublicUrl(path);
+            return data.publicUrl;
+        }
+        async function deleteImage(url){
+            if(!url) return;
+            const m=url.match(/\/object\/public\/[^/]+\/(.+)$/);
+            if(!m) return;
+            await sb.storage.from(BUCKET).remove([decodeURIComponent(m[1])]);
+        }
+
+        /* ---------- Datos ---------- */
+        const run=async q=>{const{data,error}=await q.select();return error?error.message:(data&&data.length?'':'Sin permiso para guardar. Revisa que tu correo coincida con el de las políticas de Supabase.');};
+
+        async function load(){
+            if(!sb){app.innerHTML='<div class="w"><p class="msg">Falta configurar Supabase: pega tu URL y tu anon key al inicio de index.html.</p></div>';return;}
+            const[a,b]=await Promise.all([
+                sb.from('profile').select('*').eq('id',1).maybeSingle(),
+                sb.from('projects').select('*').order('position').order('created_at')
+            ]);
+            const err=a.error||b.error;
+            if(err){app.innerHTML=`<div class="w"><p class="msg">No se pudo cargar el contenido: ${esc(err.message)}</p></div>`;return;}
+            P=a.data||{name:'Tu nombre',skills:[]};
+            L=b.data||[];
+            const{data:{session}}=await sb.auth.getSession();
+            adm=!!session;
+            render();
+        }
+
+        /* ---------- Render ---------- */
+        function render(){
+            const p=P,sk=p.skills||[];
+            document.title=[p.name,p.role].filter(Boolean).join(' — ')||'Portafolio';
+
+            const cards=L.map(x=>{
+                const img=safe(x.image_url);
+                return `<article class="card">
+      <div class="thumb">
+        ${img?`<img src="${esc(img)}" alt="Captura de ${esc(x.title)}" loading="lazy" decoding="async">`:`<div class="ph">Sin imagen</div>`}
+      </div>
+      <div class="card-body">
+        <h3>${esc(x.title)}</h3>
+        ${x.description?`<p>${esc(x.description)}</p>`:''}
+        ${(x.tags||[]).length?`<p class="tg">${x.tags.map(t=>`<span>#${esc(t)}</span>`).join('')}</p>`:''}
+        <div class="links">
+          ${link(x.demo_url,'Demo ↗')}
+          ${link(x.repo_url,'Código ↗')}
+          <span class="ctl">
+            <button class="t" data-do="edit" data-id="${x.id}">Editar</button>
+            <button class="t" data-do="del" data-id="${x.id}">Eliminar</button>
+          </span>
         </div>
+      </div>
+    </article>`;
+            }).join('')||'<p class="mut">Todavía no hay proyectos.</p>';
+
+            const ct=[
+                p.email&&`<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`,
+                link(p.github,'GitHub'),
+                link(p.linkedin,'LinkedIn')
+            ].filter(Boolean);
+
+            app.innerHTML=`<div class="w">
+    <header class="top" id="top">
+      <a class="brand" href="#">${esc(p.name)}</a>
+      <div class="tools">
+        <nav id="nav">
+          <a href="#proyectos">Proyectos</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+        <button class="iconbtn" id="themeBtn" aria-label="Cambiar tema"></button>
+        <button class="iconbtn hamb" id="hamb" aria-label="Menú" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </header>
+    <main>
+      <h1>${esc(p.headline)}</h1>
+      <p class="lede">${esc(p.bio)}</p>
+      <section id="proyectos"><h2>Proyectos</h2><div class="grid">${cards}</div></section>
+      ${sk.length?`<section><h2>Herramientas</h2><p class="sk">${sk.map(esc).join(', ')}</p></section>`:''}
+      <section id="contacto"><h2>Contacto</h2>${ct.length?`<div class="ct">${ct.join('')}</div>`:'<p class="mut">Aún no hay datos de contacto.</p>'}</section>
+    </main>
+    <footer>${esc([p.role,p.location].filter(Boolean).join(', '))}<br><span id="seal">©</span> ${new Date().getFullYear()} ${esc(p.name)}</footer>
+  </div>`;
+
+            document.body.classList.toggle('adm',adm);
+            bar.innerHTML=adm?'<span>Modo admin</span><button data-do="new">Nuevo proyecto</button><button data-do="prof">Perfil</button><button data-do="out">Cerrar sesión</button>':'';
+
+            // Tema + menú + scroll sombra
+            applyTheme(localStorage.getItem(THEME_KEY)||'auto');
+            $('#themeBtn').addEventListener('click',cycleTheme);
+            const nav=$('#nav'),hamb=$('#hamb');
+            hamb.addEventListener('click',()=>{
+                const open=nav.classList.toggle('open');
+                hamb.setAttribute('aria-expanded',String(open));
+            });
+            nav.addEventListener('click',()=>{nav.classList.remove('open');hamb.setAttribute('aria-expanded','false');});
+            const top=$('#top');
+            const onScroll=()=>top.classList.toggle('scrolled',scrollY>8);
+            addEventListener('scroll',onScroll,{passive:true});onScroll();
+        }
+
+        /* ---------- Formulario de proyecto ---------- */
+        function projForm(x){
+            const isNew=!x;
+            x=x||{title:'',description:'',tags:[],demo_url:'',repo_url:'',image_url:'',position:L.length?Math.max(...L.map(y=>y.position||0))+1:1};
+            show(`<h2>${isNew?'Nuevo proyecto':'Editar proyecto'}</h2>
+    ${fld('f1','Título',x.title)}
+    ${fld('f2','Descripción',x.description||'','ta')}
+    ${fld('f3','Tecnologías (separadas por coma)',(x.tags||[]).join(', '))}
+    ${fld('f4','Enlace de la demo (https://…)',x.demo_url||'')}
+    ${fld('f5','Enlace del código (https://…)',x.repo_url||'')}
+    <label for="fimg">Imagen del proyecto (máx. 3 MB)</label>
+    <input id="fimg" type="file" accept="image/*">
+    <div class="preview ${x.image_url?'on':''}" id="prev">
+      ${x.image_url?`<img src="${esc(x.image_url)}" alt="Vista previa">`:''}
     </div>
-    
-    <footer>
-        <p>Solucionador de Método Simplex</p>
-        <p>Desarrollado por Juan Pablo Cime Chim - ISC 3A - TecNM Campus Motul</p>
-    </footer>
+    <label for="frmv" style="display:${x.image_url?'block':'none'}"><input type="checkbox" id="frmv" style="width:auto;margin-right:6px;vertical-align:middle"> Quitar imagen actual</label>
+    ${fld('f6','Orden (el número menor va primero)',x.position,'number')}
+    <p class="er" id="er"></p>
+    <div class="row"><button class="b" data-do="close">Cancelar</button><button class="b p2" data-do="save">Guardar</button></div>`,
+                {async save(){
+                        const v=i=>$('#'+i,dlg).value.trim();
+                        const er=$('#er',dlg);
+                        if(!v('f1')){er.textContent='El título es obligatorio.';return;}
+                        const file=$('#fimg',dlg).files[0];
+                        const removeOld=$('#frmv',dlg)?.checked;
+                        const saveBtn=$('[data-do="save"]',dlg);
+                        saveBtn.disabled=true;er.textContent='Guardando…';
+                        try{
+                            let image_url=x.image_url||null;
+                            if(file) image_url=await uploadImage(file);
+                            else if(removeOld) image_url=null;
 
-    <script>
-        // Bloquear inspección de página
-        document.addEventListener('keydown', function(e) {
-            // Bloquear F12
-            if (e.key === 'F12') {
-                e.preventDefault();
-                return false;
-            }
-            
-            // Bloquear Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+U
-            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C')) {
-                e.preventDefault();
-                return false;
-            }
-            
-            if (e.ctrlKey && e.key === 'u') {
-                e.preventDefault();
-                return false;
-            }
-        });
-        
-        // Mostrar overlay al intentar abrir herramientas de desarrollo
-        let devtoolsOpen = false;
-        setInterval(function() {
-            const widthThreshold = window.outerWidth - window.innerWidth > 160;
-            const heightThreshold = window.outerHeight - window.innerHeight > 160;
-            
-            if (!devtoolsOpen && (widthThreshold || heightThreshold)) {
-                devtoolsOpen = true;
-                document.getElementById('overlay').style.display = 'block';
-            } else if (devtoolsOpen && !widthThreshold && !heightThreshold) {
-                devtoolsOpen = false;
-                document.getElementById('overlay').style.display = 'none';
-            }
-        }, 1000);
+                            const o={title:v('f1'),description:v('f2'),tags:list(v('f3')),demo_url:v('f4'),repo_url:v('f5'),image_url,position:parseInt(v('f6'))||0};
+                            const m=await run(isNew?sb.from('projects').insert(o):sb.from('projects').update(o).eq('id',x.id));
+                            if(m){er.textContent=m;saveBtn.disabled=false;return;}
 
-        // Toggle de tema claro/oscuro
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        
-        themeToggle.addEventListener('click', function() {
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                body.classList.add('light-mode');
-                themeToggle.textContent = '☀️';
-            } else {
-                body.classList.remove('light-mode');
-                body.classList.add('dark-mode');
-                themeToggle.textContent = '🌙';
-            }
+                            // Borrar imagen anterior si se reemplazó o quitó
+                            if(!isNew && x.image_url && x.image_url!==image_url){
+                                try{ await deleteImage(x.image_url); }catch(e){ /* silencioso */ }
+                            }
+                            dlg.close();load();
+                        }catch(e){
+                            er.textContent=e.message||'Error al guardar.';saveBtn.disabled=false;
+                        }
+                    }});
+
+            // Vista previa
+            $('#fimg',dlg).addEventListener('change',e=>{
+                const f=e.target.files[0];const prev=$('#prev',dlg);
+                if(!f){prev.classList.remove('on');return;}
+                const url=URL.createObjectURL(f);
+                prev.classList.add('on');
+                prev.innerHTML=`<img src="${url}" alt="Vista previa">`;
+            });
+            // Si marca "quitar", ocultar preview
+            const rmv=$('#frmv',dlg);
+            if(rmv) rmv.addEventListener('change',e=>{
+                const prev=$('#prev',dlg);
+                if(e.target.checked){prev.classList.remove('on');prev.innerHTML='';}
+                else if(x.image_url){prev.classList.add('on');prev.innerHTML=`<img src="${esc(x.image_url)}" alt="Vista previa">`;}
+            });
+        }
+
+        /* ---------- Perfil ---------- */
+        function profForm(){
+            const p=P;
+            show(`<h2>Perfil</h2>
+    ${fld('q1','Nombre',p.name||'')}
+    ${fld('q2','Rol',p.role||'')}
+    ${fld('q3','Titular de la portada',p.headline||'','ta')}
+    ${fld('q4','Biografía',p.bio||'','ta')}
+    ${fld('q5','Ubicación',p.location||'')}
+    ${fld('q6','Correo',p.email||'','email')}
+    ${fld('q7','GitHub (https://…)',p.github||'')}
+    ${fld('q8','LinkedIn (https://…)',p.linkedin||'')}
+    ${fld('q9','Herramientas (separadas por coma)',(p.skills||[]).join(', '),'ta')}
+    <p class="er" id="er"></p>
+    <div class="row"><button class="b" data-do="close">Cancelar</button><button class="b p2" data-do="save">Guardar</button></div>`,
+                {async save(){
+                        const v=i=>$('#'+i,dlg).value.trim(),er=$('#er',dlg);
+                        if(!v('q1')){er.textContent='El nombre es obligatorio.';return;}
+                        er.textContent='Guardando…';
+                        const m=await run(sb.from('profile').upsert({id:1,name:v('q1'),role:v('q2'),headline:v('q3'),bio:v('q4'),location:v('q5'),email:v('q6'),github:v('q7'),linkedin:v('q8'),skills:list(v('q9'))}));
+                        if(m){er.textContent=m;return;}
+                        dlg.close();load();
+                    }});
+        }
+
+        /* ---------- Login ---------- */
+        function login(){
+            if(adm)return;
+            if(!sb)return info('Supabase sin configurar','Pega tu URL y tu anon key al inicio de index.html para activar el acceso.');
+            show(`<h2>Acceso privado</h2>
+    ${fld('e','Correo','','email')}
+    ${fld('pw','Contraseña','','password')}
+    <p class="er" id="er"></p>
+    <div class="row"><button class="b" data-do="close">Cancelar</button><button class="b p2" data-do="go">Entrar</button></div>`,
+                {async go(){
+                        const er=$('#er',dlg);er.textContent='Verificando…';
+                        const{error}=await sb.auth.signInWithPassword({email:$('#e',dlg).value.trim(),password:$('#pw',dlg).value});
+                        if(error){er.textContent='Correo o contraseña incorrectos.';return;}
+                        adm=true;dlg.close();render();
+                    }});
+            setTimeout(()=>$('#e',dlg)&&$('#e',dlg).focus(),0);
+        }
+
+        /* ---------- Acciones ---------- */
+        const A={
+            new:()=>projForm(),
+            edit:id=>projForm(L.find(x=>x.id===id)),
+            del:async id=>{
+                const x=L.find(y=>y.id===id);
+                if(!x||!await ask('¿Eliminar «'+x.title+'»?','Eliminar'))return;
+                const m=await run(sb.from('projects').delete().eq('id',id));
+                if(m){info('No se pudo eliminar',m);return;}
+                try{ await deleteImage(x.image_url); }catch(e){}
+                load();
+            },
+            prof:profForm,
+            out:async()=>{await sb.auth.signOut();adm=false;render();},
+            close:()=>dlg.close()
+        };
+        document.addEventListener('click',e=>{const t=e.target.closest('[data-do]');if(!t)return;const f=K[t.dataset.do]||A[t.dataset.do];if(f)f(t.dataset.id);});
+        dlg.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&K.go)K.go();});
+
+        /* ---------- Accesos ocultos (admin / Ctrl+Shift+L / 5 clics en ©) ---------- */
+        let buf='',c=0,tm;
+        addEventListener('keydown',e=>{
+            if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='l'){e.preventDefault();login();return;}
+            if(/^(input|textarea|select)$/i.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey||e.key.length!==1)return;
+            buf=(buf+e.key.toLowerCase()).slice(-5);
+            if(buf==='admin'){buf='';login();}
+        });
+        app.addEventListener('click',e=>{
+            if(e.target.id!=='seal')return;
+            clearTimeout(tm);tm=setTimeout(()=>c=0,2500);
+            if(++c>=5){c=0;login();}
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const problemInput = document.getElementById('problemInput');
-            const solveBtn = document.getElementById('solveBtn');
-            const output = document.getElementById('output');
-            const errorContainer = document.getElementById('errorContainer');
-            const loading = document.getElementById('loading');
-            const controls = document.getElementById('controls');
-            const prevIterationBtn = document.getElementById('prevIteration');
-            const nextIterationBtn = document.getElementById('nextIteration');
-            const iterationCounter = document.getElementById('iterationCounter');
-            const problemTypeRadios = document.querySelectorAll('input[name="problemType"]');
-            
-            let currentIteration = 0;
-            let totalIterations = 0;
-            let iterationData = [];
-            let problemType = 'max'; // Por defecto maximización
-            
-            // Actualizar tipo de problema
-            problemTypeRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    problemType = this.value;
-                });
-            });
-            
-            // Ejemplo por defecto
-            problemInput.value = "5x1 + 4x2; 6x1 + 4x2 <= 24; 6x1 + 3x2 <= 22.5; x1 + x2 <= 5; x1 + 2x2 <= 6; -x1 + x2 <= 1; x2 <= 2; x1 >= 0; x2 >= 0";
-            
-            solveBtn.addEventListener('click', function() {
-                const problemText = problemInput.value.trim();
-                if (!problemText) {
-                    showError("Por favor, ingrese un problema para resolver.");
-                    return;
-                }
-                
-                // Mostrar loading
-                loading.style.display = 'block';
-                output.innerHTML = '';
-                errorContainer.innerHTML = '';
-                controls.style.display = 'none';
-                
-                // Usar setTimeout para permitir que la UI se actualice
-                setTimeout(() => {
-                    try {
-                        const result = procesarProblema(problemText);
-                        if (result.error) {
-                            showError(result.error);
-                        } else {
-                            iterationData = [result.matrizInicial, ...result.iteraciones];
-                            totalIterations = iterationData.length;
-                            currentIteration = totalIterations > 0 ? totalIterations - 1 : 0;
-                            
-                            mostrarResultados(result);
-                            updateIterationControls();
-                        }
-                    } catch (e) {
-                        showError("Error al procesar el problema: " + e.message);
-                    } finally {
-                        loading.style.display = 'none';
-                    }
-                }, 50);
-            });
-            
-            prevIterationBtn.addEventListener('click', function() {
-                if (currentIteration > 0) {
-                    currentIteration--;
-                    showCurrentIteration();
-                    updateIterationControls();
-                }
-            });
-            
-            nextIterationBtn.addEventListener('click', function() {
-                if (currentIteration < totalIterations - 1) {
-                    currentIteration++;
-                    showCurrentIteration();
-                    updateIterationControls();
-                }
-            });
-            
-            function updateIterationControls() {
-                iterationCounter.textContent = `Iteración ${currentIteration + 1}/${totalIterations}`;
-                prevIterationBtn.disabled = currentIteration === 0;
-                nextIterationBtn.disabled = currentIteration === totalIterations - 1;
-            }
-            
-            function showCurrentIteration() {
-                const iterationDiv = document.getElementById('iterationContent');
-                if (iterationDiv) {
-                    iterationDiv.innerHTML = generarTablaHTML(iterationData[currentIteration]);
-                }
-            }
-            
-            function showError(message) {
-                errorContainer.innerHTML = `<div class="error">${message}</div>`;
-            }
-            
-            function mostrarResultados(result) {
-                const isMinimization = problemType === 'min';
-                const zValue = isMinimization ? -result.solucion.z : result.solucion.z;
-                
-                let html = `
-                    <div class="result-box">
-                        <div class="result-title">FUNCIÓN OBJETIVO (${isMinimization ? 'min Z' : 'max Z'}):</div>
-                        <div>Coeficientes: [${result.coefObjetivo.join(', ')}]</div>
-                    </div>
-                    
-                    <div class="result-box">
-                        <div class="result-title">RESTRICCIONES:</div>
-                `;
-                
-                for (let i = 0; i < result.restricciones.length; i++) {
-                    const tipoStr = result.tiposRestriccion[i] === 1 ? '<=' : 
-                                  result.tiposRestriccion[i] === -1 ? '>=' : '=';
-                    html += `<div>Restricción ${i + 1}: [${result.restricciones[i].join(', ')}] ${tipoStr} ${result.resultados[i]}</div>`;
-                }
-                
-                html += `</div>`;
-                
-                html += `
-                    <div class="result-box">
-                        <div class="result-title">TABLA SIMPLEX INICIAL</div>
-                        ${generarTablaHTML(result.matrizInicial)}
-                    </div>
-                `;
-                
-                if (result.iteraciones && result.iteraciones.length > 0) {
-                    controls.style.display = 'flex';
-                    html += `
-                        <div class="result-box">
-                            <div class="result-title">ITERACIÓN ACTUAL</div>
-                            <div id="iterationContent">${generarTablaHTML(iterationData[currentIteration])}</div>
-                        </div>
-                    `;
-                }
-                
-                if (result.solucion) {
-                    html += `
-                        <div class="solution">
-                            <div class="solution-title">SOLUCIÓN ÓPTIMA - RESULTADO FINAL</div>
-                            <div class="performance-info">Tiempo de procesamiento: ${result.tiempo}ms | Iteraciones: ${result.iteraciones.length}</div>
-                            <div>Valor óptimo de Z = ${zValue.toFixed(4)}</div>
-                            <div style="margin-top: 15px; font-weight: 600;">Variables básicas:</div>
-                    `;
-                    
-                    for (const [variable, valor] of Object.entries(result.solucion.variables)) {
-                        html += `<div class="variable">${variable} = ${valor.toFixed(4)}</div>`;
-                    }
-                    
-                    html += `</div>`;
-                }
-                
-                output.innerHTML = html;
-            }
-            
-            function generarTablaHTML(matriz) {
-                if (!matriz || matriz.length === 0) return '';
-                
-                let html = '<table>';
-                
-                // Encabezados
-                html += '<tr><th>Fila</th>';
-                html += '<th>Z</th>';
-                for (let j = 1; j < matriz[0].length - 1; j++) {
-                    html += `<th>x${j}</th>`;
-                }
-                html += '<th>RHS</th></tr>';
-                
-                // Filas
-                for (let i = 0; i < matriz.length; i++) {
-                    html += `<tr><td>${i === 0 ? 'Z' : 'F' + i}</td>`;
-                    for (let j = 0; j < matriz[i].length; j++) {
-                        const valor = Math.abs(matriz[i][j]) < 1e-10 ? 0 : matriz[i][j];
-                        html += `<td>${valor.toFixed(4)}</td>`;
-                    }
-                    html += '</tr>';
-                }
-                
-                html += '</table>';
-                return html;
-            }
-            
-            // Implementación optimizada del método simplex
-            function procesarProblema(cadena) {
-                const startTime = performance.now();
-                
-                try {
-                    // Dividir la cadena por el separador ';'
-                    const partes = cadena.split(';').map(p => p.trim()).filter(p => p);
-                    
-                    if (partes.length < 2) {
-                        return { error: "Debe ingresar al menos una función objetivo y una restricción" };
-                    }
-                    
-                    // Función objetivo (invertir signos para maximización)
-                    const funcionObjetivo = partes[0];
-                    const [coefObjetivo, variablesOrden] = extraerCoeficientesConOrden(funcionObjetivo, null, problemType === 'max');
-                    
-                    // Procesar restricciones
-                    const restricciones = [];
-                    const resultados = [];
-                    const tiposRestriccion = [];  // 1 para <=, -1 para >=, 0 para =
-                    
-                    for (let i = 1; i < partes.length; i++) {
-                        const restriccion = partes[i];
-                        
-                        if (restriccion.includes('<=')) {
-                            const partesRestr = restriccion.split('<=');
-                            const [coef] = extraerCoeficientesConOrden(partesRestr[0].trim(), variablesOrden, false);
-                            const resultado = parseFloat(partesRestr[1].trim());
-                            restricciones.push(coef);
-                            resultados.push(resultado);
-                            tiposRestriccion.push(1);  // <=
-                        } else if (restriccion.includes('>=')) {
-                            const partesRestr = restriccion.split('>=');
-                            const [coef] = extraerCoeficientesConOrden(partesRestr[0].trim(), variablesOrden, false);
-                            const resultado = parseFloat(partesRestr[1].trim());
-                            restricciones.push(coef);
-                            resultados.push(resultado);
-                            tiposRestriccion.push(-1);  // >=
-                        } else if (restriccion.includes('=')) {
-                            const partesRestr = restriccion.split('=');
-                            const [coef] = extraerCoeficientesConOrden(partesRestr[0].trim(), variablesOrden, false);
-                            const resultado = parseFloat(partesRestr[1].trim());
-                            restricciones.push(coef);
-                            resultados.push(resultado);
-                            tiposRestriccion.push(0);  // =
-                        } else {
-                            return { error: `Restricción sin operador de comparación: ${restriccion}` };
-                        }
-                    }
-                    
-                    // Construir la matriz inicial
-                    const matrizInicial = construirMatriz(coefObjetivo, restricciones, resultados, tiposRestriccion);
-                    
-                    // Aplicar método simplex optimizado
-                    const { matrizOptima, iteraciones } = metodoSimplexOptimizado(matrizInicial);
-                    
-                    // Obtener solución
-                    const solucion = mostrarSolucion(matrizOptima);
-                    
-                    const endTime = performance.now();
-                    const tiempo = Math.round(endTime - startTime);
-                    
-                    return {
-                        coefObjetivo,
-                        restricciones,
-                        resultados,
-                        tiposRestriccion,
-                        matrizInicial,
-                        iteraciones,
-                        solucion,
-                        tiempo
-                    };
-                    
-                } catch (e) {
-                    return { error: "Error al procesar el problema: " + e.message };
-                }
-            }
-            
-            function extraerCoeficientesConOrden(expresion, ordenVariables, invertir) {
-                // Si no se proporciona orden, determinar las variables de la expresión
-                if (!ordenVariables) {
-                    // Usar un Set para mejor rendimiento con muchas variables
-                    const variablesSet = new Set();
-                    const patronVar = /[a-zA-Z]\d*/g;
-                    let match;
-                    
-                    while ((match = patronVar.exec(expresion)) !== null) {
-                        variablesSet.add(match[0]);
-                    }
-                    
-                    ordenVariables = Array.from(variablesSet).sort((a, b) => {
-                        const numA = parseInt(a.substring(1)) || 0;
-                        const numB = parseInt(b.substring(1)) || 0;
-                        return numA - numB;
-                    });
-                }
-                
-                // Inicializar coeficientes con ceros
-                const coeficientes = new Array(ordenVariables.length).fill(0);
-                
-                // Patrón optimizado para encontrar términos
-                const terminos = expresion.match(/([+-]?)\s*(\d*\.?\d*)\s*([a-zA-Z]\d*)?/g) || [];
-                
-                for (const termino of terminos) {
-                    if (!termino.trim()) continue;
-                    
-                    // Extraer componentes del término
-                    const match = termino.match(/([+-]?)\s*(\d*\.?\d*)\s*([a-zA-Z]\d*)?/);
-                    if (!match) continue;
-                    
-                    const [_, signo, coefStr, varName] = match;
-                    
-                    // Determinar el signo
-                    const factorSigno = signo === '-' ? -1 : 1;
-                    
-                    // Determinar el coeficiente numérico
-                    let valor = 1.0;
-                    if (coefStr && coefStr !== '.') {
-                        valor = parseFloat(coefStr) || 1.0;
-                    }
-                    
-                    let coeficiente = factorSigno * valor;
-                    
-                    // Invertir signo si es necesario
-                    if (invertir) {
-                        coeficiente = -coeficiente;
-                    }
-                    
-                    // Asignar a la posición correcta
-                    if (varName) {
-                        const idx = ordenVariables.indexOf(varName);
-                        if (idx !== -1) {
-                            coeficientes[idx] += coeficiente;
-                        }
-                    }
-                }
-                
-                return [coeficientes, ordenVariables];
-            }
-            
-            function construirMatriz(coefObjetivo, restricciones, resultados, tiposRestriccion) {
-                const numRestricciones = restricciones.length;
-                const numVariables = coefObjetivo.length;
-                
-                // Calcular dimensiones de la matriz
-                const columnas = 1 + numVariables + numRestricciones + 1;
-                const filas = numRestricciones + 1;
-                
-                // Inicializar matriz con ceros de forma más eficiente
-                const matriz = Array(filas);
-                for (let i = 0; i < filas; i++) {
-                    matriz[i] = Array(columnas).fill(0);
-                }
-                
-                // Fila 0: función objetivo
-                matriz[0][0] = 1.0;  // Variable Z
-                for (let j = 0; j < numVariables; j++) {
-                    matriz[0][j + 1] = coefObjetivo[j];
-                }
-                
-                // Filas de restricciones (1 en adelante)
-                for (let i = 0; i < numRestricciones; i++) {
-                    const filaIdx = i + 1;
-                    
-                    // Colocar coeficientes de la restricción
-                    for (let j = 0; j < numVariables; j++) {
-                        matriz[filaIdx][j + 1] = restricciones[i][j];
-                    }
-                    
-                    // Colocar variable de holgura/excedente según el tipo de restricción
-                    const holguraPos = 1 + numVariables + i;
-                    
-                    if (tiposRestriccion[i] === 1) {  // <= (holgura positiva)
-                        matriz[filaIdx][holguraPos] = 1.0;
-                    } else if (tiposRestriccion[i] === -1) {  // >= (excedente negativo)
-                        matriz[filaIdx][holguraPos] = -1.0;
-                    }
-                    // Para = no se agrega variable de holgura
-                    
-                    // Colocar resultado en la última columna
-                    matriz[filaIdx][columnas - 1] = resultados[i];
-                }
-                
-                return matriz;
-            }
-            
-            function metodoSimplexOptimizado(matriz) {
-                const iteraciones = [];
-                let iteracion = 0;
-                const maxIteraciones = 50;
-                let matrizActual = matriz.map(row => row.slice()); // Copia más eficiente
-                
-                while (iteracion < maxIteraciones) {
-                    const filaObjetivo = matrizActual[0];
-                    
-                    // Encontrar columna pivote (valor más negativo)
-                    let minValor = 0;
-                    let columnaPivote = -1;
-                    
-                    for (let j = 1; j < filaObjetivo.length - 1; j++) {
-                        if (filaObjetivo[j] < minValor) {
-                            minValor = filaObjetivo[j];
-                            columnaPivote = j;
-                        }
-                    }
-                    
-                    // Si no hay valores negativos, solución óptima encontrada
-                    if (columnaPivote === -1) break;
-                    
-                    // Encontrar fila pivote usando la regla del cociente mínimo
-                    let cocienteMinimo = Infinity;
-                    let filaPivote = -1;
-                    
-                    for (let i = 1; i < matrizActual.length; i++) {
-                        const divisor = matrizActual[i][columnaPivote];
-                        if (divisor <= 1e-10) continue;
-                        
-                        const cociente = matrizActual[i][matrizActual[i].length - 1] / divisor;
-                        if (cociente >= 0 && cociente < cocienteMinimo) {
-                            cocienteMinimo = cociente;
-                            filaPivote = i;
-                        }
-                    }
-                    
-                    if (filaPivote === -1) break;
-                    
-                    // Aplicar eliminación de Gauss-Jordan optimizada
-                    aplicarGaussJordanOptimizado(matrizActual, filaPivote, columnaPivote);
-                    
-                    // Guardar iteración (solo si es necesario para mostrar)
-                    iteraciones.push(matrizActual.map(row => row.slice()));
-                    
-                    iteracion++;
-                }
-                
-                return { matrizOptima: matrizActual, iteraciones };
-            }
-            
-            function aplicarGaussJordanOptimizado(matriz, filaPivote, columnaPivote) {
-                const numFilas = matriz.length;
-                const numColumnas = matriz[0].length;
-                const elementoPivote = matriz[filaPivote][columnaPivote];
-                
-                // Normalizar la fila pivote
-                for (let j = 0; j < numColumnas; j++) {
-                    matriz[filaPivote][j] /= elementoPivote;
-                }
-                
-                // Hacer ceros en las demás filas de la columna pivote
-                for (let i = 0; i < numFilas; i++) {
-                    if (i === filaPivote) continue;
-                    
-                    const factor = matriz[i][columnaPivote];
-                    for (let j = 0; j < numColumnas; j++) {
-                        matriz[i][j] -= factor * matriz[filaPivote][j];
-                    }
-                }
-            }
-            
-            function mostrarSolucion(matriz) {
-                const numFilas = matriz.length;
-                const numColumnas = matriz[0].length;
-                
-                // Valor óptimo de Z
-                const zOptimo = matriz[0][numColumnas - 1];
-                
-                // Encontrar variables básicas
-                const variables = {};
-                
-                for (let j = 1; j < numColumnas - 1; j++) {
-                    let countUnos = 0;
-                    let filaBasica = -1;
-                    let valorBasico = 0;
-                    
-                    for (let i = 0; i < numFilas; i++) {
-                        if (Math.abs(matriz[i][j] - 1.0) < 1e-6) {
-                            countUnos++;
-                            filaBasica = i;
-                            valorBasico = matriz[i][numColumnas - 1];
-                        } else if (Math.abs(matriz[i][j]) > 1e-6) {
-                            countUnos++;
-                        }
-                    }
-                    
-                    if (countUnos === 1 && filaBasica !== -1) {
-                        variables[`x${j}`] = valorBasico;
-                    }
-                }
-                
-                return { z: zOptimo, variables };
-            }
-        });
-    </script>
+        load();
+    })();
+</script>
 </body>
 </html>
